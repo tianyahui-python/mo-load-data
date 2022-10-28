@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-#pip3 install shyaml
+pip3 install shyaml
 
 if [[ $# -eq 0 ]];then
     echo "No parameters provided,please use -H to get help. "
