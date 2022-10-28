@@ -148,6 +148,6 @@ load
 
 if [ $STATUS -eq 1 ];then
    echo "This test has been failed, more info, please see the log" | tee -a ${WORKSPACE}/run.log
-   exit
+   exit 1
 fi
 
