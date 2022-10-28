@@ -1,0 +1,19 @@
+db: "test"
+table: "t1"
+count: 2
+
+#if not from s3, path must be relative from ./data
+#if from s3, s3 path here
+path: "data.csv" 
+s3: "false"
+terminated: ","
+ddl: "create table if not exists t1(
+col1 tinyint,
+col2 smallint,
+col3 int,
+col4 bigint,
+col5 tinyint unsigned,
+col6 smallint unsigned,
+col7 int unsigned,
+col8 bigint unsigned
+);"
