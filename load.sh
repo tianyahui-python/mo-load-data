@@ -15,8 +15,10 @@ PORT=6001
 USER=dump
 PASS=111
 CONFIG=cases
+TIMES=1
+CHECK="true"
 
-while getopts ":h:P:u:p:c:t:rH" opt
+while getopts ":h:P:u:p:c:t:rgH" opt
 do
     case $opt in
         h)
@@ -36,10 +38,13 @@ do
         ;;
         r)
         REPLACE="true"
-	;;
+	      ;;
         t)
-	TIMES="${OPTARG}"
-	;;
+        TIMES="${OPTARG}"
+        ;;
+        g)
+        CHECK="true"
+        ;;
         H)
         echo -e "Usage:　bash load.sh [option] [param] ...\nExcute mo load data task"
         echo -e "   -h  mo server address"
@@ -87,13 +92,19 @@ function load() {
       echo -e "The data for table ${db}.${table} has been loaded successfully, and cost: ${cost}" | tee -a ${WORKSPACE}/run.log
       local name=`basename ${cfg} .yml`
       echo "${name}:${cost}" >> ${WORKSPACE}/report/cost.txt | tee -a ${WORKSPACE}/run.log
-      check $cfg
-      if [ $? -eq 1 ];then
-        STATUS=1
-	echo "${name}:Failed" >> ${WORKSPACE}/report/cost.txt | tee -a ${WORKSPACE}/run.log
+      
+      if [ "${CHECK}" = "true" ];then
+        check $cfg
+        if [ $? -eq 1 ];then
+          STATUS=1
+	        echo "${name}:Failed" >> ${WORKSPACE}/report/cost.txt | tee -a ${WORKSPACE}/run.log
+        else
+	        echo "${name}:Success" >> ${WORKSPACE}/report/cost.txt | tee -a ${WORKSPACE}/run.log
+        fi
       else
-	echo "${name}:Success" >> ${WORKSPACE}/report/cost.txt | tee -a ${WORKSPACE}/run.log
+        echo "${name}:Success" >> ${WORKSPACE}/report/cost.txt | tee -a ${WORKSPACE}/run.log
       fi
+      
       echo -e ""
       echo -e "" >> ${WORKSPACE}/report/cost.txt | tee -a ${WORKSPACE}/run.log
     else
@@ -153,12 +164,11 @@ function createSchema() {
     fi
     
     if [ "${REPLACE}" = "true" ];then
-        
-        result=`mysql -h${SERVER} -P${PORT} -u${USER} -p${PASS} -e "${drop}" 2>&1`
-        if [ $? -ne 0 ];then
-	    echo -e "The table ${db}.${table} cant not be drop. Error: ${result}"  | tee -a ${WORKSPACE}/run.log
-            return 1
-        fi
+      result=`mysql -h${SERVER} -P${PORT} -u${USER} -p${PASS} -e "${drop}" 2>&1`
+      if [ $? -ne 0 ];then
+	      echo -e "The table ${db}.${table} cant not be drop. Error: ${result}"  | tee -a ${WORKSPACE}/run.log
+        return 1
+      fi
     fi
 
     result=`mysql -h${SERVER} -P${PORT} -u${USER} -p${PASS} -e "use ${db};${ddl}" 2>&1`
@@ -175,11 +185,11 @@ function listCases() {
     dir=$1
     for file in ${dir}/*
     do
-        if [ -f ${file} ];then
-	    CFGLIST=(${CFGLIST[*]} $file)
-        else 
-	    listCases $file
-        fi
+      if [ -f ${file} ];then
+        CFGLIST=(${CFGLIST[*]} $file)
+      else 
+        listCases $file
+      fi
     done
 }
 
@@ -193,27 +203,58 @@ else
     mkdir p ${WORKSPACE}/report/
 fi
 
-
-if [ -d ${dir} ];then
+if [ "${TIMES}" = "1" ];then
+  if [ -d ${dir} ];then
     listCases ${dir}
     for cfg in ${CFGLIST[*]}
     do
-        createSchema $cfg
-	load $cfg
+      createSchema $cfg
+      load $cfg
     done
-					      
+                  
     if [ $STATUS -eq 1 ];then
-        echo "This test has been failed, more info, please see the log" | tee -a ${WORKSPACE}/run.log
-	exit 1
+      echo "This test has been failed, more info, please see the log" | tee -a ${WORKSPACE}/run.log
+      exit 1
     fi  
     exit 0
-else
+  else
     createSchema ${dir}
-    load ${dir}
-									  
-     if [ $STATUS -eq 1 ];then
-         echo "This test has been failed, more info, please see the log" | tee -a ${WORKSPACE}/run.log
-         exit 1
-     fi  
-exit 0
+    load ${dir}                  
+    if [ $STATUS -eq 1 ];then
+      echo "This test has been failed, more info, please see the log" | tee -a ${WORKSPACE}/run.log
+      exit 1
+    fi  
+    exit 0
+  fi
+else
+  echo "This test will be run for ${TIMES} times"
+    for i in $(seq 1 ${TIMES})
+    do
+      if [ -d ${dir} ];then
+        listCases ${dir}
+        for cfg in ${CFGLIST[*]}
+        do
+          createSchema $cfg
+          load $cfg
+        done
+      
+        echo "The ${i} turn test has ended, and test report is in ./report/${i} dir." | tee -a ${WORKSPACE}/run.log
+        mkdir -p ${WORKSPACE}/report/${i}/
+        mv ${WORKSPACE}/report/*.txt ${WORKSPACE}/report/${i}/            
+        
+        if [ $STATUS -eq 1 ];then
+          echo "This test has been failed, more info, please see the log" | tee -a ${WORKSPACE}/run.log
+          exit 1
+        fi
+        exit 0
+      else
+        createSchema ${dir}
+        load ${dir}                  
+        if [ $STATUS -eq 1 ];then
+          echo "This test has been failed, more info, please see the log" | tee -a ${WORKSPACE}/run.log
+          exit 1
+        fi  
+        exit 0
+    fi
+    done
 fi
