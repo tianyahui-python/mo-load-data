@@ -43,7 +43,7 @@ do
         TIMES="${OPTARG}"
         ;;
         g)
-        CHECK="true"
+        CHECK="false"
         ;;
         H)
         echo -e "Usage:　bash load.sh [option] [param] ...\nExcute mo load data task"
@@ -228,8 +228,10 @@ if [ "${TIMES}" = "1" ];then
   fi
 else
   echo "This test will be run for ${TIMES} times"
+  echo -e ""
     for i in $(seq 1 ${TIMES})
     do
+      echo "The ${i} turn has been stared, please wait......." | tee -a ${WORKSPACE}/run.log
       if [ -d ${dir} ];then
         listCases ${dir}
         for cfg in ${CFGLIST[*]}
@@ -242,19 +244,14 @@ else
         mkdir -p ${WORKSPACE}/report/${i}/
         mv ${WORKSPACE}/report/*.txt ${WORKSPACE}/report/${i}/            
         
-        if [ $STATUS -eq 1 ];then
-          echo "This test has been failed, more info, please see the log" | tee -a ${WORKSPACE}/run.log
-          exit 1
-        fi
-        exit 0
       else
         createSchema ${dir}
-        load ${dir}                  
-        if [ $STATUS -eq 1 ];then
-          echo "This test has been failed, more info, please see the log" | tee -a ${WORKSPACE}/run.log
-          exit 1
-        fi  
-        exit 0
+        load ${dir}
     fi
     done
+    if [ $STATUS -eq 1 ];then
+      echo "This test has been failed, more info, please see the log" | tee -a ${WORKSPACE}/run.log
+      exit 1
+    fi
+    exit 0
 fi
