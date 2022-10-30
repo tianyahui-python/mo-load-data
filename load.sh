@@ -76,12 +76,14 @@ function load() {
     local ddl=`cat ${cfg} | shyaml get-value ddl`
     local terminated=`cat ${cfg} | shyaml get-value terminated`
     local s3=`cat ${cfg} | shyaml get-value s3`
+    local name=`basename ${cfg} .yml`
     if [ "${s3}" != "true" ]; then
       file=${WORKSPACE}/data/${file}
       #echo $file
     fi
     
     local sql="load data infile '${file}' into table ${db}.${table} FIELDS TERMINATED BY '${terminated}' LINES TERMINATED BY '\n';"
+    echo -e "[${name}]"
     echo -e "Start to load data from file ${file} into table ${db}.${table},please wait....." | tee -a ${WORKSPACE}/run.log
     echo "${sql}"
     startTime=`date +%s.%N`
@@ -90,7 +92,6 @@ function load() {
       endTime=`date +%s.%N`
       getTiming $startTime $endTime
       echo -e "The data for table ${db}.${table} has been loaded successfully, and cost: ${cost}" | tee -a ${WORKSPACE}/run.log
-      local name=`basename ${cfg} .yml`
       echo "${name}:${cost}" >> ${WORKSPACE}/report/cost.txt | tee -a ${WORKSPACE}/run.log
       
       if [ "${CHECK}" = "true" ];then
@@ -105,17 +106,23 @@ function load() {
         echo "${name}:Success" >> ${WORKSPACE}/report/cost.txt | tee -a ${WORKSPACE}/run.log
       fi
       
-      echo -e ""
       echo -e "" >> ${WORKSPACE}/report/cost.txt | tee -a ${WORKSPACE}/run.log
     else
       STATUS=1
       echo -e "The data for table ${db}.${table} has failed to be loaded." | tee -a ${WORKSPACE}/run.log
       echo "${result}"
-      local name=`basename ${cfg} .yml`
       echo "${name}: ${result}" | awk 'NR>1' | tee -a >> ${WORKSPACE}/report/cost.txt | tee -a ${WORKSPACE}/run.log
-      echo -e ""
       echo -e "" >> ${WORKSPACE}/report/cost.txt | tee -a ${WORKSPACE}/run.log
     fi
+
+    if [ $STATUS -eq 1 ];then
+        echo "This test for [${name}] has been executed failed, more info, please see the log" | tee -a ${WORKSPACE}/run.log
+    else
+	echo "This test for [${name}] has been executed successfully" | tee -a ${WORKSPACE}/run.log
+    fi
+
+    echo -e ""
+
 }
 
 function getTiming(){
@@ -182,7 +189,7 @@ function createSchema() {
 }
 
 function listCases() {
-    dir=$1
+    local dir=$1
     for file in ${dir}/*
     do
       if [ -f ${file} ];then
@@ -194,7 +201,7 @@ function listCases() {
 }
 
 
-dir=${WORKSPACE}/${CONFIG}
+dir=${CONFIG}
 
 
 if [ -e ${WORKSPACE}/report ];then
@@ -232,6 +239,7 @@ else
     for i in $(seq 1 ${TIMES})
     do
       echo "The ${i} turn has been stared, please wait......." | tee -a ${WORKSPACE}/run.log
+      unset CFGLIST
       if [ -d ${dir} ];then
         listCases ${dir}
         for cfg in ${CFGLIST[*]}
