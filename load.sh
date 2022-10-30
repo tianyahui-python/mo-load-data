@@ -241,6 +241,8 @@ else
         done
       
         echo "The ${i} turn test has ended, and test report is in ./report/${i} dir." | tee -a ${WORKSPACE}/run.log
+        echo -e ""
+        
         mkdir -p ${WORKSPACE}/report/${i}/
         mv ${WORKSPACE}/report/*.txt ${WORKSPACE}/report/${i}/            
         
@@ -250,8 +252,9 @@ else
     fi
     done
     if [ $STATUS -eq 1 ];then
-      echo "This test has been failed, more info, please see the log" | tee -a ${WORKSPACE}/run.log
+      echo "This test has been executed failed, more info, please see the log" | tee -a ${WORKSPACE}/run.log
       exit 1
     fi
+    echo "This test has been executed successfully, more info, please see the log" | tee -a ${WORKSPACE}/run.log
     exit 0
 fi
