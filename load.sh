@@ -78,7 +78,12 @@ function load() {
     local s3=`cat ${cfg} | shyaml get-value s3`
     local name=`basename ${cfg} .yml`
     if [ "${s3}" != "true" ]; then
-      file=${WORKSPACE}/data/${file}
+      file1=${WORKSPACE}/data/${file}
+      if [ ! -f "${file1}" ]; then
+          file=${file}
+      else
+          file=${file1}	      
+      fi
       #echo $file
     fi
     
