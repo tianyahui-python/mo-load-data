@@ -1,0 +1,21 @@
+db: "tpcc_10"
+table: "bmsql_oorder"
+count: 300000
+
+#if not from s3, path must be relative from ./data
+#if from s3, s3 path here
+path: "tpcc_10/order.csv" 
+s3: "false"
+terminated: ","
+ddl: "create table bmsql_oorder (
+  o_w_id       integer      not null,
+  o_d_id       integer      not null,
+  o_id         integer      not null,
+  o_c_id       integer,
+  o_carrier_id integer,
+  o_ol_cnt     integer,
+  o_all_local  integer,
+  o_entry_d    timestamp,
+  primary key (o_w_id, o_d_id, o_id)
+) PARTITION BY KEY(o_w_id);
+"

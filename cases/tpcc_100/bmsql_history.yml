@@ -1,0 +1,22 @@
+db: "tpcc_100"
+table: "bmsql_history"
+count: 3000000
+
+#if not from s3, path must be relative from ./data
+#if from s3, s3 path here
+path: "tpcc_100/cust-hist.csv" 
+s3: "false"
+terminated: ","
+ddl: "create table bmsql_history (
+  hist_id  integer auto_increment,
+  h_c_id   integer,
+  h_c_d_id integer,
+  h_c_w_id integer,
+  h_d_id   integer,
+  h_w_id   integer,
+  h_date   timestamp,
+  h_amount decimal(6,2),
+  h_data   varchar(24),
+  primary key (hist_id)
+);
+"

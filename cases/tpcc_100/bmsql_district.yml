@@ -1,0 +1,24 @@
+db: "tpcc_100"
+table: "bmsql_district"
+count: 1000
+
+#if not from s3, path must be relative from ./data
+#if from s3, s3 path here
+path: "tpcc_100/district.csv" 
+s3: "false"
+terminated: ","
+ddl: "create table bmsql_district (
+  d_w_id       integer       not null,
+  d_id         integer       not null,
+  d_ytd        decimal(12,2),
+  d_tax        decimal(4,4),
+  d_next_o_id  integer,
+  d_name       varchar(10),
+  d_street_1   varchar(20),
+  d_street_2   varchar(20),
+  d_city       varchar(20),
+  d_state      char(2),
+  d_zip        char(9),
+  primary key (d_w_id, d_id)
+) PARTITION BY KEY(d_w_id);
+"

@@ -1,0 +1,23 @@
+db: "tpcc_100"
+table: "bmsql_order_line"
+count: 30002818
+
+#if not from s3, path must be relative from ./data
+#if from s3, s3 path here
+path: "tpcc_100/order-line.csv" 
+s3: "false"
+terminated: ","
+ddl: "create table bmsql_order_line (
+  ol_w_id         integer   not null,
+  ol_d_id         integer   not null,
+  ol_o_id         integer   not null,
+  ol_number       integer   not null,
+  ol_i_id         integer   not null,
+  ol_delivery_d   timestamp,
+  ol_amount       decimal(6,2),
+  ol_supply_w_id  integer,
+  ol_quantity     integer,
+  ol_dist_info    char(24),
+  primary key (ol_w_id, ol_d_id, ol_o_id, ol_number)
+) PARTITION BY KEY(ol_w_id);
+"

@@ -1,0 +1,30 @@
+db: "tpcc_100"
+table: "bmsql_stock"
+count: 10000000
+
+#if not from s3, path must be relative from ./data
+#if from s3, s3 path here
+path: "tpcc_100/stock.csv" 
+s3: "false"
+terminated: ","
+ddl: "create table bmsql_stock (
+  s_w_id       integer       not null,
+  s_i_id       integer       not null,
+  s_quantity   integer,
+  s_ytd        integer,
+  s_order_cnt  integer,
+  s_remote_cnt integer,
+  s_data       varchar(50),
+  s_dist_01    char(24),
+  s_dist_02    char(24),
+  s_dist_03    char(24),
+  s_dist_04    char(24),
+  s_dist_05    char(24),
+  s_dist_06    char(24),
+  s_dist_07    char(24),
+  s_dist_08    char(24),
+  s_dist_09    char(24),
+  s_dist_10    char(24),
+  primary key (s_w_id, s_i_id)
+) PARTITION BY KEY(s_w_id);
+"

@@ -1,0 +1,22 @@
+db: "tpcc_10"
+table: "bmsql_warehouse"
+count: 10
+
+#if not from s3, path must be relative from ./data
+#if from s3, s3 path here
+path: "tpcc_10/warehouse.csv" 
+s3: "false"
+terminated: ","
+ddl: "create table bmsql_warehouse (
+  w_id        integer   not null,
+  w_ytd       decimal(12,2),
+  w_tax       decimal(4,4),
+  w_name      varchar(10),
+  w_street_1  varchar(20),
+  w_street_2  varchar(20),
+  w_city      varchar(20),
+  w_state     char(2),
+  w_zip       char(9),
+  primary key (w_id)
+) PARTITION BY KEY(w_id);
+"

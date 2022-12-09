@@ -1,5 +1,5 @@
 db: "test"
-table: "table_10000_100_columns"
+table: "table_100_columns_1w"
 count: 10000
 
 #if not from s3, path must be relative from ./data
@@ -7,7 +7,7 @@ count: 10000
 path: "100_columns/10000_100_columns_load_data.csv" 
 s3: "false"
 terminated: ","
-ddl: "create table table_10000_100_columns(
+ddl: "create table table_100_columns_1w(
 clo1 tinyint,
 clo2 smallint,
 clo3 int,

@@ -1,0 +1,13 @@
+db: "tpcc_10"
+table: "bmsql_config"
+count: 4
+
+#if not from s3, path must be relative from ./data
+#if from s3, s3 path here
+path: "tpcc_10/config.csv" 
+s3: "false"
+terminated: ","
+ddl: "create table bmsql_config(
+cfg_name    varchar(30) primary key,
+cfg_value   varchar(50)
+);"

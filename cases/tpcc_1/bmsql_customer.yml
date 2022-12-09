@@ -1,0 +1,34 @@
+db: "tpcc_1"
+table: "bmsql_customer"
+count: 30000
+
+#if not from s3, path must be relative from ./data
+#if from s3, s3 path here
+path: "tpcc_1/customer.csv" 
+s3: "false"
+terminated: ","
+ddl: "create table bmsql_customer (
+  c_w_id         integer        not null,
+  c_d_id         integer        not null,
+  c_id           integer        not null,
+  c_discount     decimal(4,4),
+  c_credit       char(2),
+  c_last         varchar(16),
+  c_first        varchar(16),
+  c_credit_lim   decimal(12,2),
+  c_balance      decimal(12,2),
+  c_ytd_payment  decimal(12,2),
+  c_payment_cnt  integer,
+  c_delivery_cnt integer,
+  c_street_1     varchar(20),
+  c_street_2     varchar(20),
+  c_city         varchar(20),
+  c_state        char(2),
+  c_zip          char(9),
+  c_phone        char(16),
+  c_since        timestamp,
+  c_middle       char(2),
+  c_data         varchar(500),
+  primary key (c_w_id, c_d_id, c_id)
+) PARTITION BY KEY(c_w_id);
+"
